@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uncle Steve - AI Sports Betting Companion & Live Board</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+  <style>
+    :root {
+      --bg-dark: #0a0d12;
+      --card-bg: #121820;
+      --card-inner: #18212c;
+      --border: #223042;
+      --border-bright: #2d415b;
+      --text-main: #f0f4f8;
+      --text-muted: #8899a6;
+      --accent-green: #00e676;
+      --accent-green-dark: #00b050;
+      --accent-green-bg: rgba(0, 230, 118, 0.12);
+      --accent-degen: #ff3366;
+      --accent-degen-bg: rgba(255, 51, 102, 0.12);
+      --accent-gold: #ffb703;
+      --accent-gold-bg: rgba(255, 183, 3, 0.15);
+      --accent-blue: #38bdf8;
+      --accent-orange: #fb923c;
+      --bubble-user: #1f2c3f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Top Sportsbook Header */
+    header {
+      background: #0f141c;
+      border-bottom: 1px solid var(--border);
+      padding: 0.65rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo-badge {
+      background: linear-gradient(135deg, #00e676, #00b050);
+      color: #06150b;
+      font-weight: 900;
+      font-size: 1.1rem;
+      padding: 0.35rem 0.6rem;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 12px rgba(0,230,118,0.3);
+    }
+    .brand-text h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .brand-text span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Nav View Switcher */
+    .view-switcher {
+      display: flex;
+      background: #141b24;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      gap: 2px;
+    }
+    .nav-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.82rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+    .nav-tab:hover {
+      color: var(--text-main);
+    }
+    .nav-tab.active {
+      background: var(--card-bg);
+      color: var(--accent-green);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      border: 1px solid var(--border-bright);
+    }
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 0.7; }
+      50% { opacity: 1; filter: brightness(1.3); }
+      100% { opacity: 0.7; }
+    }
+
+    /* Live Rumor / Buzz Ticker */
+    .rumor-ticker-bar {
+      background: #0d121a;
+      border-bottom: 1px solid var(--border);
+      padding: 0.35rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.78rem;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .rumor-label {
+      background: var(--accent-gold-bg);
+      color: var(--accent-gold);
+      border: 1px solid rgba(255, 183, 3, 0.4);
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 0.68rem;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .rumor-text-scroll {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #9cb1c9;
+      flex: 1;
+    }
+    .rumor-source-tag {
+      color: var(--accent-blue);
+      font-weight: 700;
+      margin-right: 0.4rem;
+    }
+
+    /* Sports Filter Ticker */
+    .sports-ticker {
+      background: #090c10;
+      border-bottom: 1px solid var(--border);
+      padding: 0.45rem 1.25rem;
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      white-space: nowrap;
+      flex-shrink: 0;
+      scrollbar-width: none;
+    }
+    .sports-ticker::-webkit-scrollbar { display: none; }
+    .sport-tag {
+      background: #141b24;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.15s ease;
+    }
+    .sport-tag:hover {
+      background: #1d2836;
+      color: var(--text-main);
+      border-color: var(--border-bright);
+    }
+    .sport-tag.active {
+      background: var(--accent-green-bg);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    /* Main Container (Two Columns on Desktop) */
+    .main-layout {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Views: Chat vs Live Scores */
+    .app-view {
+      display: none;
+      flex: 1;
+      height: 100%;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .app-view.active {
+      display: flex;
+    }
+
+    /* Chat Section */
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-width: 0;
+      border-right: 1px solid var(--border);
+    }
+
+    .chat-header {
+      background: #0f151e;
+      border-bottom: 1px solid var(--border);
+      padding: 0.65rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
+    .steve-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #27374d, #121820);
+      border: 2px solid var(--accent-green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      box-shadow: 0 0 10px rgba(0, 230, 118, 0.25);
+    }
+    .steve-info h2 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .steve-info p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Message Log */
+    #log {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      scroll-behavior: smooth;
+    }
+
+    .msg {
+      display: flex;
+      flex-direction: column;
+      max-width: 88%;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .msg.user {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+    .msg.agent {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+    .bubble {
+      padding: 0.85rem 1.1rem;
+      border-radius: 14px;
+      line-height: 1.5;
+      font-size: 0.92rem;
+      position: relative;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .msg.user .bubble {
+      background: var(--bubble-user);
+      color: #fff;
+      border-bottom-right-radius: 3px;
+      border: 1px solid var(--border-bright);
+    }
+    .msg.agent .bubble {
+      background: var(--card-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 3px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+    }
+    .bubble.rich {
+      background: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+      max-width: 100%;
+      white-space: normal;
+    }
+
+    /* In-Chat Rumor / Social Warning Box */
+    .rumor-warning-box {
+      margin-top: 0.6rem;
+      background: #1e1713;
+      border: 1px solid rgba(251, 146, 60, 0.5);
+      border-left: 4px solid var(--accent-orange);
+      border-radius: 6px;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.8rem;
+      color: #ffedd5;
+      line-height: 1.4;
+    }
+    .rumor-warning-box strong {
+      color: var(--accent-orange);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 0.25rem;
+      font-size: 0.82rem;
+    }
+    .chatter-tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      background: rgba(251, 146, 60, 0.15);
+      color: #fed7aa;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      margin-top: 0.35rem;
+      border: 1px solid rgba(251, 146, 60, 0.3);
+    }
+
+    /* Add Bet to Slip Button inside Chat Bubble */
+    .add-to-slip-action {
+      margin-top: 0.65rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--accent-green-bg);
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .add-to-slip-action:hover {
+      background: var(--accent-green);
+      color: #051408;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 10px rgba(0, 230, 118, 0.3);
+    }
+
+    /* Degen Parlay Highlight Container */
+    .degen-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: var(--accent-degen-bg);
+      color: var(--accent-degen);
+      border: 1px solid var(--accent-degen);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      padding: 0.25rem 0.55rem;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      box-shadow: 0 0 10px rgba(255, 51, 102, 0.2);
+    }
+    .msg.degen-mode .bubble {
+      border: 1px solid var(--accent-degen) !important;
+      background: #191218 !important;
+    }
+
+    /* Empty state */
+    .empty-state {
+      margin: auto;
+      text-align: center;
+      max-width: 520px;
+      padding: 2rem 1rem;
+    }
+    .empty-state .avatar-big {
+      font-size: 3.5rem;
+      margin-bottom: 0.75rem;
+      display: inline-block;
+      filter: drop-shadow(0 0 16px rgba(0, 230, 118, 0.4));
+    }
+    .empty-state h3 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+      letter-spacing: -0.3px;
+    }
+    .empty-state p {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.45;
+    }
+
+    .quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.55rem;
+    }
+    .chip {
+      background: #16202c;
+      border: 1px solid var(--border-bright);
+      color: #e2e8f0;
+      padding: 0.5rem 0.9rem;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+    .chip:hover {
+      background: var(--accent-green-bg);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+      transform: translateY(-1px);
+    }
+    .chip.degen {
+      border-color: rgba(255, 51, 102, 0.4);
+      background: rgba(255, 51, 102, 0.08);
+      color: #ff708f;
+    }
+    .chip.degen:hover {
+      background: var(--accent-degen-bg);
+      border-color: var(--accent-degen);
+      color: var(--accent-degen);
+    }
+
+    /* Quick bar above input */
+    .input-quickbar {
+      background: #0d121a;
+      border-top: 1px solid var(--border);
+      padding: 0.45rem 1rem;
+      display: flex;
+      gap: 0.45rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .input-quickbar::-webkit-scrollbar { display: none; }
+    .input-chip {
+      background: #141c26;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.3rem 0.65rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .input-chip:hover {
+      background: var(--accent-green-bg);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+    .input-chip.degen {
+      color: #ff708f;
+      border-color: rgba(255, 51, 102, 0.3);
+    }
+    .input-chip.degen:hover {
+      border-color: var(--accent-degen);
+      color: var(--accent-degen);
+    }
+
+    /* Form & Input */
+    form {
+      display: flex;
+      gap: 0.65rem;
+      padding: 0.85rem 1rem;
+      background: #0f151e;
+      border-top: 1px solid var(--border);
+      align-items: center;
+    }
+    input {
+      flex: 1;
+      background: #151d28;
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    input:focus {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 2px rgba(0, 230, 118, 0.15);
+    }
+    input::placeholder {
+      color: #556577;
+    }
+    button.send-btn {
+      background: var(--accent-green);
+      color: #06180c;
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem 1.25rem;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.15s ease;
+    }
+    button.send-btn:hover {
+      background: #02f37e;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 230, 118, 0.3);
+    }
+
+    /* Typing indicator */
+    .typing {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0.4rem 0.2rem;
+    }
+    .typing span {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      animation: bounce 1.2s infinite ease-in-out;
+    }
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Side Bet Slip Panel (Desktop Only) */
+    .betslip-panel {
+      width: 330px;
+      background: #0f151e;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .betslip-header {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .betslip-header h3 {
+      font-size: 0.88rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .betslip-count {
+      background: var(--accent-green-bg);
+      color: var(--accent-green);
+      font-weight: 800;
+      font-size: 0.72rem;
+      padding: 0.2rem 0.45rem;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 230, 118, 0.3);
+    }
+    .betslip-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .betslip-empty {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      margin: auto 0;
+      padding: 1.5rem;
+      line-height: 1.4;
+    }
+    .betslip-item {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent-green);
+      border-radius: 8px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      animation: fadeIn 0.2s ease-in-out;
+      position: relative;
+    }
+    .betslip-item.degen {
+      border-left-color: var(--accent-degen);
+    }
+    .slip-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-right: 1.5rem;
+    }
+    .slip-pick {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #fff;
+    }
+    .slip-odds {
+      color: var(--accent-green);
+      font-weight: 800;
+      font-size: 0.85rem;
+      background: rgba(0, 230, 118, 0.1);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+    }
+    .slip-remove-btn {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.6rem;
+      background: transparent;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 1.1rem;
+      line-height: 1;
+      border-radius: 4px;
+      padding: 2px;
+      transition: color 0.15s ease;
+    }
+    .slip-remove-btn:hover {
+      color: var(--accent-degen);
+      background: rgba(255, 51, 102, 0.1);
+    }
+    .slip-matchup {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .slip-reason {
+      font-size: 0.72rem;
+      color: #a4b3c4;
+      line-height: 1.3;
+      border-top: 1px dashed #243447;
+      padding-top: 0.35rem;
+      margin-top: 0.2rem;
+    }
+    .slip-rumor-pill {
+      font-size: 0.7rem;
+      color: var(--accent-orange);
+      background: rgba(251, 146, 60, 0.1);
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      border: 1px solid rgba(251, 146, 60, 0.3);
+      margin-top: 0.2rem;
+      line-height: 1.3;
+    }
+    .betslip-footer {
+      padding: 0.85rem 1rem;
+      border-top: 1px solid var(--border);
+      background: #0b1017;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .clear-slip-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.45rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .clear-slip-btn:hover {
+      background: #182230;
+      color: #fff;
+    }
+
+    /* --- PAGE 2: LIVE SCOREBOARD & UPCOMING GAMES --- */
+    .scoreboard-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--bg-dark);
+      overflow-y: auto;
+      padding: 1.25rem 1.5rem;
+      gap: 1.25rem;
+    }
+    .board-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .board-header h2 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .board-filters {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .b-filter-btn {
+      background: #141b24;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .b-filter-btn.active, .b-filter-btn:hover {
+      background: var(--accent-green-bg);
+      color: var(--accent-green);
+      border-color: var(--accent-green);
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1rem;
+    }
+    .game-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+      position: relative;
+    }
+    .game-card:hover {
+      border-color: var(--border-bright);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+    }
+    .game-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.4rem;
+    }
+    .game-status-pill {
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+    }
+    .game-status-pill.live {
+      background: rgba(0, 230, 118, 0.15);
+      color: var(--accent-green);
+      border: 1px solid var(--accent-green);
+      animation: pulse 1.5s infinite;
+    }
+    .game-status-pill.scheduled {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+    }
+    .game-status-pill.final {
+      background: rgba(148, 163, 184, 0.1);
+      color: #94a3b8;
+    }
+    .game-clock {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .teams-matchup {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .team-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .team-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .team-logo-img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+    .team-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+    }
+    .team-score {
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: var(--accent-green);
+    }
+    .game-odds-bar {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.45rem 0.65rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+    }
+    .odds-spread {
+      color: #fff;
+      font-weight: 700;
+    }
+    .odds-total {
+      color: var(--text-muted);
+    }
+    .ask-steve-game-btn {
+      background: #192534;
+      border: 1px solid var(--border-bright);
+      color: #93c5fd;
+      padding: 0.45rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      transition: all 0.15s ease;
+    }
+    .ask-steve-game-btn:hover {
+      background: var(--accent-green-bg);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    /* Responsible Gaming Footer */
+    footer {
+      background: #080a0e;
+      border-top: 1px solid #182230;
+      padding: 0.45rem 1rem;
+      font-size: 0.7rem;
+      color: #5b6b7d;
+      text-align: center;
+      flex-shrink: 0;
+      line-height: 1.35;
+    }
+
+    /* A2UI Component Styling (Styled as Sportsbook Cards) */
+    .a2card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      max-width: 100%;
+    }
+    .a2card.degen-card {
+      border: 1px solid rgba(255, 51, 102, 0.5) !important;
+      box-shadow: 0 0 16px rgba(255, 51, 102, 0.25) !important;
+    }
+    .a2card + .a2card, .a2col > .a2card { margin-top: 0.6rem; }
+    .a2col { display: flex; flex-direction: column; gap: 0.45rem; }
+    .a2row { display: flex; flex-direction: row; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+    .a2row.between { justify-content: space-between; }
+    .a2text { margin: 0; line-height: 1.4; color: var(--text-main); }
+    .a2text.a2-h1 { font-size: 1.35rem; font-weight: 800; color: #fff; letter-spacing: -0.2px; }
+    .a2text.a2-h2 { font-size: 1.1rem; font-weight: 800; color: var(--accent-green); }
+    .a2text.a2-h3 { font-size: 0.98rem; font-weight: 700; color: #fff; }
+    .a2text.a2-h4 { font-size: 0.88rem; font-weight: 600; color: var(--text-muted); }
+    .a2text.a2-caption { font-size: 0.78rem; color: #7f91a4; }
+    .a2divider { border: none; border-top: 1px solid var(--border); margin: 0.4rem 0; width: 100%; }
+    .a2img {
+      max-width: 100%;
+      border-radius: 8px;
+      display: block;
+      border: 1px solid var(--border);
+      margin-top: 0.4rem;
+    }
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-size: 1.2rem;
+      line-height: 1;
+      vertical-align: middle;
+      color: var(--accent-green);
+    }
+
+    @media (max-width: 860px) {
+      .betslip-panel { display: none; }
+      .chat-container { border-right: none; }
+      .msg { max-width: 95%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Top Sportsbook Header with Navigation -->
+  <header>
+    <div class="brand">
+      <div class="logo-badge">STEVE</div>
+      <div class="brand-text">
+        <h1>Uncle Steve <span>Sportsbook AI</span></h1>
+      </div>
+    </div>
+
+    <!-- View Switcher (Chat vs Live Board) -->
+    <div class="view-switcher">
+      <button id="nav-chat-btn" class="nav-tab active" onclick="switchView('chat')">
+        <span>💬 Uncle Steve Chat</span>
+      </button>
+      <button id="nav-scores-btn" class="nav-tab" onclick="switchView('scores')">
+        <div class="live-dot"></div>
+        <span>⚡ Live Scores & Board</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Live Social Buzz / Rumor Ticker -->
+  <div class="rumor-ticker-bar">
+    <div class="rumor-label">🔥 Buzz Wire</div>
+    <div id="rumor-ticker-text" class="rumor-text-scroll">
+      <span class="rumor-source-tag">[Reddit /r/sportsbook Chatter]</span> Loading live whispers from Twitter & Reddit locker rooms...
+    </div>
+  </div>
+
+  <!-- Quick Sports Category Bar -->
+  <div class="sports-ticker">
+    <div class="sport-tag active" onclick="handleSportFilter('ALL')">🔥 All Sports</div>
+    <div class="sport-tag" onclick="handleSportFilter('NBA')">🏀 NBA</div>
+    <div class="sport-tag" onclick="handleSportFilter('NFL')">🏈 NFL</div>
+    <div class="sport-tag" onclick="handleSportFilter('NHL')">🏒 NHL</div>
+    <div class="sport-tag" onclick="handleSportFilter('MLB')">⚾ MLB</div>
+    <div class="sport-tag" onclick="handleSportFilter('Premier League')">⚽ Premier League</div>
+    <div class="sport-tag" onclick="handleSportFilter('La Liga')">⚽ La Liga</div>
+  </div>
+
+  <!-- Main Layout -->
+  <div class="main-layout">
+
+    <!-- VIEW 1: Uncle Steve Chat -->
+    <div id="view-chat" class="app-view active">
+      <div class="chat-container">
+        <div class="chat-header">
+          <div class="steve-avatar">🧢</div>
+          <div class="steve-info">
+            <h2>Uncle Steve <span style="font-size:0.75rem; font-weight:normal; color:#00e676;">• Sharp EV + Wild Hunches</span></h2>
+            <p>Your degenerate AI betting uncle. Ask about games, odds, parlays & crazy rumors.</p>
+          </div>
+        </div>
+
+        <!-- Messages Log -->
+        <div id="log">
+          <!-- Interactive Empty State -->
+          <div id="empty-state" class="empty-state">
+            <div class="avatar-big">🧢</div>
+            <h3>What's the move today, kid?</h3>
+            <p>Don't just stare at the board. Tell me what sport you're eyeing or pick a quick move below and let's find some +EV value.</p>
+            <div class="quick-chips">
+              <div class="chip" onclick="sendPrompt('Build me a sharp parlay for today\'s games with the odds and payout.')">🔥 Build Me a Parlay</div>
+              <div class="chip degen" onclick="sendDegenParlay()">🎲 Degen Parlay</div>
+              <div class="chip" onclick="sendPrompt('Analyse today\'s games and show me the best matchups.')">📊 Analyse Today's Games</div>
+              <div class="chip" onclick="sendPrompt('Find me the best value underdog on the board today.')">🐶 Find an Underdog</div>
+              <div class="chip" onclick="sendPrompt('Uncle Steve, what is your absolute lock of the century today, and why?')">🧠 Uncle Steve's Take</div>
+              <div class="chip" onclick="sendPrompt('Generate a visual betting badge for your favorite lock!')">🎨 Bet Badge Image</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Action Bar above input -->
+        <div class="input-quickbar">
+          <div class="input-chip" onclick="sendPrompt('🔥 Build me a 2-leg parlay')">🔥 Build Parlay</div>
+          <div class="input-chip degen" onclick="sendDegenParlay()">🎲 Degen Mode</div>
+          <div class="input-chip" onclick="sendPrompt('🐶 Who is today\'s biggest live dog?')">🐶 Top Dog</div>
+          <div class="input-chip" onclick="sendPrompt('📊 Show today\'s live scoreboard and lines')">📊 Live Lines</div>
+          <div class="input-chip" onclick="sendPrompt('Uncle Steve, what crazy rumor are people talking about on Reddit or Twitter right now?')">📡 Reddit/Twitter Rumors</div>
+        </div>
+
+        <!-- Fixed Message Composer -->
+        <form id="form">
+          <input id="input" placeholder="Ask Uncle Steve about odds, games, rumors, or parlays…" autocomplete="off" autofocus>
+          <button type="submit" class="send-btn">
+            <span>Send</span>
+            <span style="font-size:1.1rem; line-height:1;">⚡</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Bet Slip Side Panel (Integrated With Add/Remove functionality) -->
+      <div class="betslip-panel">
+        <div class="betslip-header">
+          <h3><span>📋</span> Steve's Bet Slip</h3>
+          <span id="slip-count" class="betslip-count">0 Picks</span>
+        </div>
+        <div id="betslip-items" class="betslip-content">
+          <div id="betslip-empty" class="betslip-empty">
+            <p>No active picks loaded yet.</p>
+            <p style="margin-top:0.4rem; font-size:0.75rem; color:#5b6b7d;">Ask Uncle Steve for a lock or parlay, or click "+ Add to Bet Slip" under any of his picks!</p>
+          </div>
+        </div>
+        <div class="betslip-footer">
+          <button class="clear-slip-btn" onclick="clearBetSlip()">Clear Bet Slip</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 2: Upcoming Games & Live Scores Page -->
+    <div id="view-scores" class="app-view">
+      <div class="scoreboard-container">
+        <div class="board-header">
+          <h2><span>⚡</span> Live Scores & Upcoming Board</h2>
+          <div class="board-filters">
+            <button class="b-filter-btn active" onclick="loadBoardSport('nba')">NBA</button>
+            <button class="b-filter-btn" onclick="loadBoardSport('nfl')">NFL</button>
+            <button class="b-filter-btn" onclick="loadBoardSport('nhl')">NHL</button>
+            <button class="b-filter-btn" onclick="loadBoardSport('mlb')">MLB</button>
+            <button class="b-filter-btn" onclick="loadBoardSport('premier_league')">EPL</button>
+          </div>
+        </div>
+
+        <div id="games-grid" class="games-grid">
+          <div style="color:var(--text-muted); padding:2rem;">Fetching live ESPN scoreboard...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Responsible Gambling Disclaimer -->
+  <footer>
+    ⚠️ <strong>Responsible Gambling Disclaimer:</strong> Sports betting involves risk. Uncle Steve's insights, rumors, and predictions are generated for entertainment and analytical purposes only and are never guaranteed outcomes. Please bet responsibly.
+  </footer>
+
+  <script>
+    const log = document.getElementById("log");
+    const form = document.getElementById("form");
+    const input = document.getElementById("input");
+    const emptyState = document.getElementById("empty-state");
+    const betslipItems = document.getElementById("betslip-items");
+    const betslipEmpty = document.getElementById("betslip-empty");
+    const slipCount = document.getElementById("slip-count");
+    const rumorTickerText = document.getElementById("rumor-ticker-text");
+    const gamesGrid = document.getElementById("games-grid");
+
+    let activePicks = [];
+    let currentBoardSport = "nba";
+    let liveRumors = [];
+
+    // View Switching
+    function switchView(viewName) {
+      document.querySelectorAll(".app-view").forEach(v => v.classList.remove("active"));
+      document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+
+      if (viewName === "chat") {
+        document.getElementById("view-chat").classList.add("active");
+        document.getElementById("nav-chat-btn").classList.add("active");
+      } else {
+        document.getElementById("view-scores").classList.add("active");
+        document.getElementById("nav-scores-btn").classList.add("active");
+        loadBoardSport(currentBoardSport);
+      }
+    }
+
+    // Ticker & Rumors Fetcher
+    async function fetchSocialRumors() {
+      try {
+        const res = await fetch("/api/rumors");
+        const data = await res.json();
+        if (data.rumors && data.rumors.length) {
+          liveRumors = data.rumors;
+          cycleRumors();
+        }
+      } catch (e) {
+        console.warn("Rumors fetch issue:", e);
+      }
+    }
+
+    let rumorIndex = 0;
+    function cycleRumors() {
+      if (!liveRumors.length) return;
+      const r = liveRumors[rumorIndex % liveRumors.length];
+      rumorTickerText.innerHTML = `<span class="rumor-source-tag">[${r.source}]</span> <strong>${r.headline}</strong> — ${r.description} <em>(${r.sentiment})</em>`;
+      rumorIndex++;
+      setTimeout(cycleRumors, 9000);
+    }
+    fetchSocialRumors();
+
+    // Live Scoreboard Fetcher
+    async function loadBoardSport(sport) {
+      currentBoardSport = sport;
+      document.querySelectorAll(".b-filter-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.textContent.toLowerCase().includes(sport.replace('_', ' ')));
+      });
+
+      gamesGrid.innerHTML = `<div style="color:var(--text-muted); padding:2rem;">Fetching ${sport.toUpperCase()} live scores and lines...</div>`;
+
+      try {
+        const res = await fetch(`/api/scoreboard?sport=${sport}`);
+        const data = await res.json();
+        renderScoreboard(data);
+      } catch (err) {
+        gamesGrid.innerHTML = `<div style="color:#ff6b6b; padding:1.5rem;">Failed to load scoreboard: ${err.message}</div>`;
+      }
+    }
+
+    function renderScoreboard(data) {
+      if (!data.games || data.games.length === 0) {
+        gamesGrid.innerHTML = `<div style="color:var(--text-muted); padding:2rem;">No games currently scheduled for ${data.sport}. Check back later or switch sport tabs!</div>`;
+        return;
+      }
+
+      gamesGrid.innerHTML = "";
+      data.games.forEach(g => {
+        const card = document.createElement("div");
+        card.className = "game-card";
+
+        const isLive = g.state === "in";
+        const isFinal = g.state === "post";
+        const statusClass = isLive ? "live" : (isFinal ? "final" : "scheduled");
+
+        card.innerHTML = `
+          <div class="game-card-top">
+            <span class="game-status-pill ${statusClass}">${isLive ? "● LIVE" : g.status}</span>
+            <span class="game-clock">${g.clock ? g.clock : (g.date ? new Date(g.date).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '')}</span>
+          </div>
+          <div class="teams-matchup">
+            <div class="team-row">
+              <div class="team-meta">
+                ${g.away.logo ? `<img class="team-logo-img" src="${g.away.logo}" alt="">` : ''}
+                <span class="team-name">${g.away.name}</span>
+              </div>
+              <span class="team-score">${g.away.score || '-'}</span>
+            </div>
+            <div class="team-row">
+              <div class="team-meta">
+                ${g.home.logo ? `<img class="team-logo-img" src="${g.home.logo}" alt="">` : ''}
+                <span class="team-name">${g.home.name}</span>
+              </div>
+              <span class="team-score">${g.home.score || '-'}</span>
+            </div>
+          </div>
+          <div class="game-odds-bar">
+            <span class="odds-spread">Spread/Line: ${g.odds || 'Even'}</span>
+            ${g.over_under ? `<span class="odds-total">O/U: ${g.over_under}</span>` : ''}
+          </div>
+          <button class="ask-steve-game-btn" onclick="askSteveAboutGame('${g.away.name} vs ${g.home.name}', '${g.odds}')">
+            <span>Ask Uncle Steve for Take & Rumors</span> <span>🧢</span>
+          </button>
+        `;
+        gamesGrid.appendChild(card);
+      });
+    }
+
+    function askSteveAboutGame(matchup, odds) {
+      switchView("chat");
+      sendPrompt(`Uncle Steve, break down ${matchup} with odds ${odds}. Give me the real math and any wild rumors buzzing on Reddit or Twitter!`);
+    }
+
+    function el(tag, cls, text) {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text != null) e.textContent = text;
+      return e;
+    }
+
+    function createBubble(who, isDegen = false) {
+      if (emptyState && emptyState.parentNode) {
+        emptyState.remove();
+      }
+      const m = el("div", "msg " + who + (isDegen ? " degen-mode" : ""));
+      if (who === "agent" && isDegen) {
+        const badge = el("div", "degen-badge", "🎲 DEGEN MODE ACTIVATED");
+        m.appendChild(badge);
+      }
+      const b = el("div", "bubble");
+      m.appendChild(b);
+      log.appendChild(m);
+      log.scrollTop = log.scrollHeight;
+      return b;
+    }
+
+    function showTyping(who = "agent") {
+      const b = createBubble(who);
+      b.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+      return b;
+    }
+
+    /* Bet Slip Add & Remove Logic */
+    function addBetToSlip(pick, odds, matchup, rumorText = "", isDegen = false) {
+      // Check for duplicate
+      if (activePicks.some(p => p.pick.toLowerCase() === pick.toLowerCase())) {
+        return;
+      }
+      const betId = "bet-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+      const betObj = { id: betId, pick, odds, matchup, rumorText, isDegen };
+      activePicks.push(betObj);
+      renderBetSlip();
+    }
+
+    function removeBetFromSlip(betId) {
+      activePicks = activePicks.filter(p => p.id !== betId);
+      renderBetSlip();
+    }
+
+    function clearBetSlip() {
+      activePicks = [];
+      renderBetSlip();
+    }
+
+    function renderBetSlip() {
+      slipCount.textContent = `${activePicks.length} Pick${activePicks.length === 1 ? '' : 's'}`;
+      if (activePicks.length === 0) {
+        betslipItems.innerHTML = `
+          <div id="betslip-empty" class="betslip-empty">
+            <p>No active picks loaded yet.</p>
+            <p style="margin-top:0.4rem; font-size:0.75rem; color:#5b6b7d;">Ask Uncle Steve for a lock or parlay, or click "+ Add to Bet Slip" under any of his picks!</p>
+          </div>
+        `;
+        return;
+      }
+
+      betslipItems.innerHTML = "";
+      activePicks.forEach(p => {
+        const item = el("div", "betslip-item" + (p.isDegen ? " degen" : ""));
+        item.innerHTML = `
+          <button class="slip-remove-btn" title="Remove bet" onclick="removeBetFromSlip('${p.id}')">✕</button>
+          <div class="slip-top">
+            <span class="slip-pick">${p.pick}</span>
+            <span class="slip-odds">${p.odds}</span>
+          </div>
+          <div class="slip-matchup">${p.matchup}</div>
+          <div class="slip-reason">Analysed by Uncle Steve</div>
+          ${p.rumorText ? `<div class="slip-rumor-pill">⚠️ Rumor Noise: ${p.rumorText}</div>` : ''}
+        `;
+        betslipItems.appendChild(item);
+      });
+    }
+
+    /* A2UI Parser & Renderer */
+    function boundStr(v) {
+      if (v == null) return "";
+      if (typeof v === "string") return v;
+      if (typeof v.literalString === "string") return v.literalString;
+      return "";
+    }
+
+    function childIds(props) {
+      const ids = [];
+      if (props && typeof props.child === "string") ids.push(props.child);
+      const ch = props && props.children;
+      if (ch && Array.isArray(ch.explicitList)) {
+        for (const c of ch.explicitList) if (typeof c === "string") ids.push(c);
+      }
+      return ids;
+    }
+
+    function iconName(n) {
+      return String(n || "").replace(/([a-z0-9])([A-Z])/g, "$1_$2").replace(/\s+/g, "_").toLowerCase();
+    }
+
+    function buildNode(id, comps, seen) {
+      if (!id || seen.has(id)) return null;
+      seen.add(id);
+      const spec = comps[id];
+      if (!spec || typeof spec !== "object") return null;
+      const type = Object.keys(spec)[0];
+      const props = spec[type] || {};
+      const kids = () => childIds(props).map(cid => buildNode(cid, comps, seen)).filter(Boolean);
+
+      switch (type) {
+        case "Card": {
+          const d = el("div", "a2card");
+          kids().forEach(n => d.appendChild(n));
+          return d;
+        }
+        case "Column":
+        case "List": {
+          const horizontal = type === "List" && props.direction === "horizontal";
+          const d = el("div", horizontal ? "a2row" : "a2col");
+          kids().forEach(n => d.appendChild(n));
+          return d;
+        }
+        case "Row": {
+          const d = el("div", "a2row" + (props.distribution === "spaceBetween" ? " between" : ""));
+          kids().forEach(n => d.appendChild(n));
+          return d;
+        }
+        case "Text": {
+          const t = el("div", "a2text");
+          const hint = String(props.usageHint || "body").toLowerCase();
+          if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(hint)) t.classList.add("a2-" + hint);
+          else if (hint === "caption") t.classList.add("a2-caption");
+          t.textContent = boundStr(props.text);
+          return t;
+        }
+        case "Divider":
+          return el("hr", "a2divider");
+        case "Image": {
+          const src = boundStr(props.url || props.src);
+          if (!/^https?:\/\//i.test(src)) return null;
+          const img = el("img", "a2img");
+          img.src = src;
+          img.alt = boundStr(props.alt) || "Betting Asset";
+          return img;
+        }
+        case "Icon": {
+          const s = el("span", "material-symbols-outlined");
+          s.textContent = iconName(boundStr(props.name) || props.name);
+          return s;
+        }
+        default:
+          return null;
+      }
+    }
+
+    function renderSurface(messages, container) {
+      const comps = {};
+      const roots = [];
+      for (const m of messages) {
+        if (m.beginRendering && typeof m.beginRendering.root === "string") roots.push(m.beginRendering.root);
+        const su = m.surfaceUpdate;
+        if (su && Array.isArray(su.components)) {
+          for (const c of su.components) {
+            if (c && c.id && c.component) comps[c.id] = c.component;
+          }
+        }
+      }
+      let rootIds = roots.filter(r => comps[r]);
+      if (rootIds.length === 0) {
+        const referenced = new Set();
+        for (const id in comps) {
+          const spec = comps[id];
+          childIds(spec[Object.keys(spec)[0]] || {}).forEach(c => referenced.add(c));
+        }
+        rootIds = Object.keys(comps).filter(id => !referenced.has(id));
+      }
+      let drew = false;
+      for (const rid of rootIds) {
+        const node = buildNode(rid, comps, new Set());
+        if (node) { container.appendChild(node); drew = true; }
+      }
+      return drew;
+    }
+
+    function flattenText(messages) {
+      const out = [];
+      for (const m of messages) {
+        const su = m.surfaceUpdate;
+        if (su && Array.isArray(su.components)) {
+          for (const c of su.components) {
+            if (c && c.component && c.component.Text) out.push(boundStr(c.component.Text.text));
+          }
+        }
+      }
+      return out.join("\n").trim();
+    }
+
+    /* Intelligent Bet & Rumor Detection */
+    function inspectTextForBetsAndRumors(text, bubble, isDegen = false) {
+      const lower = text.toLowerCase();
+
+      // 1. Rumor Warning Detection
+      const hasRumor = /(rumor|whisper|conspiracy|locker room|reddit|twitter|heard|spotted|sources say|superstitious)/i.test(text);
+      if (hasRumor) {
+        const chatterType = Math.random() > 0.5
+          ? "This is the noise in Reddit comment sections right now"
+          : "Twitter chatter is looking like this";
+        const warning = el("div", "rumor-warning-box");
+        warning.innerHTML = `
+          <strong>⚠️ Rumor Alert: High Variance Speculation</strong>
+          <div>"${chatterType}" — Uncle Steve's sources are volatile. Treat this as pure narrative noise and manage your bankroll!</div>
+          <span class="chatter-tag">💬 Live Community Chatter</span>
+        `;
+        bubble.appendChild(warning);
+      }
+
+      // 2. Bet Detection for Add-to-Slip Action
+      let foundPick = null;
+      let foundOdds = "+110";
+
+      const pickMatch = text.match(/(?:Pick|Lock|Bet|Selection|Take):\s*([^,;.\n]+)/i);
+      const oddsMatch = text.match(/(?:Odds|Price):\s*([+-]\d+|\d+\/\d+|\d+\.\d+)/i);
+
+      if (pickMatch) {
+        foundPick = pickMatch[1].trim();
+        if (oddsMatch) foundOdds = oddsMatch[1].trim();
+      } else if (text.includes("Lock") || text.includes("Parlay") || text.includes("ML") || text.includes("+") || text.includes("-")) {
+        const candidate = text.match(/([A-Z][a-zA-Z0-9\s]+(?:\sML|\s[-+]\d+(?:\.\d+)?|\sOver\s\d+|\sUnder\s\d+))/);
+        if (candidate) {
+          foundPick = candidate[1].trim();
+          if (oddsMatch) foundOdds = oddsMatch[1].trim();
+        }
+      }
+
+      if (foundPick && foundPick.length < 50) {
+        const cleanPick = foundPick.replace(/[*_#]/g, '');
+        const btn = el("button", "add-to-slip-action");
+        btn.innerHTML = `<span>+ Add "${cleanPick}" to Bet Slip</span> <span>📋</span>`;
+        btn.onclick = () => {
+          addBetToSlip(cleanPick, foundOdds, "From Uncle Steve's Chat", hasRumor ? "Reddit/Twitter Chatter" : "", isDegen);
+          btn.textContent = "✓ Added to Bet Slip!";
+          btn.style.borderColor = "var(--accent-green)";
+          btn.style.color = "var(--accent-green)";
+        };
+        bubble.appendChild(btn);
+      }
+    }
+
+    function renderReply(b, parts, isDegen = false) {
+      b.textContent = "";
+      const texts = parts.filter(p => p && (p.kind === "text" || (!p.kind && p.text))).map(p => p.text || "");
+      const a2ui = parts.filter(p => p && p.kind === "a2ui" && p.data).map(p => p.data);
+
+      const textStr = texts.join("\n").trim();
+      if (textStr) {
+        b.appendChild(el("div", null, textStr));
+        inspectTextForBetsAndRumors(textStr, b, isDegen);
+      }
+
+      if (a2ui.length) {
+        b.classList.add("rich");
+        const rendered = renderSurface(a2ui, b);
+        const flat = flattenText(a2ui);
+        if (!rendered) {
+          b.appendChild(el("div", null, flat || "(no card content)"));
+        }
+        if (flat) {
+          inspectTextForBetsAndRumors(flat, b, isDegen);
+        }
+      }
+      if (!b.childNodes.length) b.textContent = "(no response from Uncle Steve)";
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function executeChat(promptText, isDegen = false) {
+      const text = promptText.trim();
+      if (!text) return;
+
+      createBubble("user").textContent = text;
+      const b = showTyping("agent");
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text })
+        });
+        const raw = await res.text();
+        let data;
+        try {
+          data = JSON.parse(raw);
+        } catch {
+          throw new Error(`Server returned non-JSON (HTTP ${res.status}). ${raw.slice(0, 300)}`);
+        }
+        renderReply(b, data.parts || [], isDegen);
+      } catch (err) {
+        b.textContent = "Uncle Steve's line got cut off! Error: " + err.message;
+      }
+    }
+
+    form.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const val = input.value;
+      input.value = "";
+      const isDegen = /degen/i.test(val);
+      executeChat(val, isDegen);
+    });
+
+    function sendPrompt(p) {
+      input.value = "";
+      executeChat(p, /degen/i.test(p));
+    }
+
+    function handleSportFilter(sport) {
+      document.querySelectorAll(".sport-tag").forEach(t => {
+        t.classList.toggle("active", t.textContent.includes(sport));
+      });
+      if (document.getElementById("view-scores").classList.contains("active")) {
+        const mapped = sport === "ALL" ? "nba" : (sport === "Premier League" ? "premier_league" : (sport === "La Liga" ? "la_liga" : sport.toLowerCase()));
+        loadBoardSport(mapped);
+      } else {
+        if (sport === 'ALL') {
+          sendPrompt("Uncle Steve, show me today's top games and betting opportunities across all sports.");
+        } else {
+          sendPrompt(`Uncle Steve, what's cooking in the ${sport} today? Any sharp lines, locks, or rumors?`);
+        }
+      }
+    }
+
+    function sendDegenParlay() {
+      sendPrompt("Uncle Steve, hit me with a high-variance, aggressive DEGEN PARLAY idea! Give me a wild superstitious rumor for why it hits, then show the crazy longshot odds, payout math, and why you secretly love it!");
+    }
+  </script>
+</body>
+</html>
